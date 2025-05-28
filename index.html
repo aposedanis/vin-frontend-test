@@ -627,19 +627,33 @@
     </div>
 
     <script>
-        // VIN Tracker Application - GARDER EXACTEMENT VOTRE LOGIQUE ORIGINALE
+        // VIN Tracker Application - DETECTION OCR PRESERVEE + API BACKEND
         class VINTracker {
             constructor() {
-                this.vins = this.loadFromStorage();
+                this.vins = [];
                 this.currentVIN = '';
                 this.deleteMode = false;
                 this.initializeElements();
                 this.attachEventListeners();
-                this.updateStats();
-                this.displayVINs();
+                this.loadVINsFromAPI(); // Charger depuis l'API au lieu du localStorage
             }
 
-            initializeElements() {
+            // CHARGEMENT INITIAL DEPUIS L'API
+            async loadVINsFromAPI() {
+                try {
+                    const api = new VINTrackerAPI();
+                    const vins = await api.getAllVINs();
+                    this.vins = vins || [];
+                    this.updateStats();
+                    this.displayVINs();
+                } catch (error) {
+                    console.error('Erreur lors du chargement des VINs:', error);
+                    // Fallback vers localStorage si l'API ne fonctionne pas
+                    this.vins = this.loadFromStorage();
+                    this.updateStats();
+                    this.displayVINs();
+                }
+            }
                 // Camera elements
                 this.video = document.getElementById('video');
                 this.canvas = document.getElementById('canvas');
@@ -753,10 +767,9 @@
                 document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
                 document.getElementById(tabId).classList.add('active');
 
-                // Update stats and list if viewing
+                // Recharger les données depuis l'API quand on consulte
                 if (tabId === 'view-vins') {
-                    this.updateStats();
-                    this.displayVINs();
+                    this.loadVINsFromAPI();
                 }
             }
 
@@ -1063,7 +1076,7 @@
                 return vinRegex.test(vin);
             }
 
-            saveVIN() {
+            async saveVIN() {
                 const vin = this.vinInput.value.toUpperCase();
                 
                 if (!this.isValidVIN(vin)) {
@@ -1078,25 +1091,36 @@
                 }
                 
                 const newVIN = {
-                    id: Date.now(),
                     code: vin,
-                    date: new Date().toISOString(),
                     image: this.capturedImage.src
                 };
                 
-                this.vins.unshift(newVIN);
-                this.saveToStorage();
-                this.updateStats();
-                this.displayVINs();
-                
-                // Reset form
-                this.vinInput.value = '';
-                this.capturedImage.style.display = 'none';
-                this.validateBtn.disabled = true;
-                this.vinInput.classList.remove('valid', 'invalid');
-                this.validationMessage.textContent = '';
-                
-                this.showSuccess('VIN enregistré avec succès !');
+                try {
+                    // Sauvegarder via l'API
+                    const api = new VINTrackerAPI();
+                    const savedVIN = await api.createVIN(newVIN);
+                    
+                    // Ajouter à la liste locale
+                    this.vins.unshift(savedVIN);
+                    
+                    // Fallback localStorage
+                    this.saveToStorage();
+                    
+                    this.updateStats();
+                    this.displayVINs();
+                    
+                    // Reset form
+                    this.vinInput.value = '';
+                    this.capturedImage.style.display = 'none';
+                    this.validateBtn.disabled = true;
+                    this.vinInput.classList.remove('valid', 'invalid');
+                    this.validationMessage.textContent = '';
+                    
+                    this.showSuccess('VIN enregistré avec succès !');
+                } catch (error) {
+                    console.error('Erreur lors de la sauvegarde:', error);
+                    this.showError('Erreur lors de la sauvegarde. Veuillez réessayer.');
+                }
             }
 
             deleteVIN() {
@@ -1121,29 +1145,43 @@
                 }
             }
 
-            confirmDelete() {
+            async confirmDelete() {
                 if (this.currentVIN) {
-                    this.vins = this.vins.filter(v => v.id !== this.currentVIN.id);
-                    this.saveToStorage();
-                    this.updateStats();
-                    this.displayVINs();
-                    
-                    // Reset form
-                    this.vinInput.value = '';
-                    this.vinInputRemove.value = '';
-                    this.capturedImage.style.display = 'none';
-                    this.capturedImageRemove.style.display = 'none';
-                    this.deleteBtn.style.display = 'none';
-                    this.validateBtn.style.display = 'inline-block';
-                    this.deleteBtnRemove.disabled = true;
-                    this.vinInput.classList.remove('valid', 'invalid');
-                    this.vinInputRemove.classList.remove('valid', 'invalid');
-                    this.validationMessage.textContent = '';
-                    this.validationMessageRemove.textContent = '';
-                    
-                    this.showSuccess('VIN supprimé avec succès !');
-                    this.showSuccessRemove('VIN supprimé avec succès !');
-                    this.closeModal();
+                    try {
+                        // Supprimer via l'API
+                        const api = new VINTrackerAPI();
+                        await api.deleteVIN(this.currentVIN.id);
+                        
+                        // Supprimer de la liste locale
+                        this.vins = this.vins.filter(v => v.id !== this.currentVIN.id);
+                        
+                        // Fallback localStorage
+                        this.saveToStorage();
+                        
+                        this.updateStats();
+                        this.displayVINs();
+                        
+                        // Reset form
+                        this.vinInput.value = '';
+                        this.vinInputRemove.value = '';
+                        this.capturedImage.style.display = 'none';
+                        this.capturedImageRemove.style.display = 'none';
+                        this.deleteBtn.style.display = 'none';
+                        this.validateBtn.style.display = 'inline-block';
+                        this.deleteBtnRemove.disabled = true;
+                        this.vinInput.classList.remove('valid', 'invalid');
+                        this.vinInputRemove.classList.remove('valid', 'invalid');
+                        this.validationMessage.textContent = '';
+                        this.validationMessageRemove.textContent = '';
+                        
+                        this.showSuccess('VIN supprimé avec succès !');
+                        this.showSuccessRemove('VIN supprimé avec succès !');
+                        this.closeModal();
+                    } catch (error) {
+                        console.error('Erreur lors de la suppression:', error);
+                        this.showError('Erreur lors de la suppression. Veuillez réessayer.');
+                        this.closeModal();
+                    }
                 }
             }
 
@@ -1329,19 +1367,20 @@
     // Initialize the application
     const tracker = new VINTracker();
 
-    // API simulation for backend integration - VOTRE CLASSE ORIGINALE
+    // API simulation for backend integration - MODIFIEE POUR VRAIE API
     class VINTrackerAPI {
         constructor() {
-            this.baseURL = '/api'; // Replace with your actual API URL
+            this.baseURL = '/api';
         }
 
         async getAllVINs() {
             try {
                 const response = await fetch(`${this.baseURL}/vins`);
+                if (!response.ok) throw new Error('Erreur réseau');
                 return await response.json();
             } catch (error) {
                 console.error('Erreur lors de la récupération des VINs :', error);
-                return [];
+                throw error;
             }
         }
 
@@ -1354,6 +1393,7 @@
                     },
                     body: JSON.stringify(vinData)
                 });
+                if (!response.ok) throw new Error('Erreur lors de la création');
                 return await response.json();
             } catch (error) {
                 console.error('Erreur lors de la création du VIN :', error);
@@ -1366,7 +1406,8 @@
                 const response = await fetch(`${this.baseURL}/vins/${vinId}`, {
                     method: 'DELETE'
                 });
-                return response.ok;
+                if (!response.ok) throw new Error('Erreur lors de la suppression');
+                return true;
             } catch (error) {
                 console.error('Erreur lors de la suppression du VIN :', error);
                 throw error;
@@ -1376,10 +1417,11 @@
         async searchVINs(query) {
             try {
                 const response = await fetch(`${this.baseURL}/vins/search?q=${query}`);
+                if (!response.ok) throw new Error('Erreur de recherche');
                 return await response.json();
             } catch (error) {
                 console.error('Erreur lors de la recherche des VINs :', error);
-                return [];
+                throw error;
             }
         }
 
