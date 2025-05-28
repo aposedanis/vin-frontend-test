@@ -760,8 +760,30 @@
                 }
             }
 
-            // ADD TAB METHODS - VOTRE LOGIQUE ORIGINALE
+            // ADD TAB METHODS - VOTRE LOGIQUE ORIGINALE + CORRECTION iOS
             async startCamera() {
+                // Détection iOS - utiliser input file directement
+                if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                    // Créer un input file temporaire pour iOS
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.capture = 'environment';
+                    input.style.display = 'none';
+                    document.body.appendChild(input);
+                    
+                    input.addEventListener('change', (e) => {
+                        if (e.target.files[0]) {
+                            this.handleFileUpload(e);
+                        }
+                        document.body.removeChild(input);
+                    });
+                    
+                    input.click();
+                    return;
+                }
+
+                // Logique originale pour Android/Desktop
                 try {
                     this.stream = await navigator.mediaDevices.getUserMedia({ 
                         video: { facingMode: 'environment' } 
@@ -856,8 +878,30 @@
                 }
             }
 
-            // REMOVE TAB METHODS - MÊMES MÉTHODES MAIS POUR L'ONGLET SUPPRIMER
+            // REMOVE TAB METHODS - MÊMES MÉTHODES MAIS POUR L'ONGLET SUPPRIMER + CORRECTION iOS
             async startCameraRemove() {
+                // Détection iOS - utiliser input file directement
+                if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                    // Créer un input file temporaire pour iOS
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.capture = 'environment';
+                    input.style.display = 'none';
+                    document.body.appendChild(input);
+                    
+                    input.addEventListener('change', (e) => {
+                        if (e.target.files[0]) {
+                            this.handleFileUploadRemove(e);
+                        }
+                        document.body.removeChild(input);
+                    });
+                    
+                    input.click();
+                    return;
+                }
+
+                // Logique originale pour Android/Desktop
                 try {
                     this.streamRemove = await navigator.mediaDevices.getUserMedia({ 
                         video: { facingMode: 'environment' } 
