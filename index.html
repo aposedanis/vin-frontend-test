@@ -1,4 +1,37 @@
-<!DOCTYPE html>
+// ========== FONCTIONS UTILITAIRES ==========
+
+            getTimeAgo(dateString) {
+                const now = new Date();
+                const date = new Date(dateString);
+                const diffInSeconds = Math.floor((now - date) / 1000);
+                
+                if (diffInSeconds < 60) {
+                    return `il y a ${diffInSeconds} seconde${diffInSeconds > 1 ? 's' : ''}`;
+                }
+                
+                const diffInMinutes = Math.floor(diffInSeconds / 60);
+                if (diffInMinutes < 60) {
+                    return `il y a ${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''}`;
+                }
+                
+                const diffInHours = Math.floor(diffInMinutes / 60);
+                if (diffInHours < 24) {
+                    return `il y a ${diffInHours} heure${diffInHours > 1 ? 's' : ''}`;
+                }
+                
+                const diffInDays = Math.floor(diffInHours / 24);
+                if (diffInDays < 30) {
+                    return `il y a ${diffInDays} jour${diffInDays > 1 ? 's' : ''}`;
+                }
+                
+                const diffInMonths = Math.floor(diffInDays / 30);
+                if (diffInMonths < 12) {
+                    return `il y a ${diffInMonths} mois`;
+                }
+                
+                const diffInYears = Math.floor(diffInMonths / 12);
+                return `il y a ${diffInYears} an${diffInYears > 1 ? 's' : ''}`;
+            }<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -525,6 +558,10 @@
         <div class="header">
             <h1>🚗 VIN Tracker</h1>
             <p>Système de Suivi et d'Enregistrement des Codes VIN - Base de Données Commune <span id="syncIndicator" class="sync-indicator synced"></span></p>
+            <div style="margin-top: 15px;">
+                <button id="globalRefreshBtn" class="btn btn-warning">🔄 Actualiser Données</button>
+                <button id="globalExportBtn" class="btn btn-success">📊 Export Excel</button>
+            </div>
         </div>
 
         <!-- Navigation Tabs -->
@@ -646,8 +683,6 @@
                         <input type="date" id="dateTo">
                         <button id="filterBtn" class="btn">🔍 Filtrer</button>
                         <button id="clearFilterBtn" class="btn btn-secondary">✖️ Effacer</button>
-                        <button id="refreshBtn" class="btn btn-warning">🔄 Actualiser</button>
-                        <button id="exportBtn" class="btn btn-success">📊 Export Excel</button>
                     </div>
                 </div>
 
@@ -780,8 +815,8 @@
                 this.searchInput.addEventListener('input', () => this.filterVINs());
                 document.getElementById('filterBtn').addEventListener('click', () => this.filterVINs());
                 document.getElementById('clearFilterBtn').addEventListener('click', () => this.clearFilters());
-                document.getElementById('refreshBtn').addEventListener('click', () => this.refreshData());
-                document.getElementById('exportBtn').addEventListener('click', () => this.exportToExcel());
+                document.getElementById('globalRefreshBtn').addEventListener('click', () => this.refreshData());
+                document.getElementById('globalExportBtn').addEventListener('click', () => this.exportToExcel());
                 
                 // Modal controls
                 document.querySelector('.close').addEventListener('click', () => this.closeModal());
@@ -1372,7 +1407,8 @@
                         <div class="vin-info">
                             <div class="vin-code">${vin.code}</div>
                             <div class="vin-date">Enregistré : ${this.formatDate(vin.date)}</div>
-                            ${vin.createdAt ? `<div class="vin-date">Créé : ${this.formatDate(vin.createdAt)}</div>` : ''}
+                            <div class="vin-date" style="color: #11998e; font-weight: 600;">📅 ${this.getTimeAgo(vin.date)}</div>
+                            ${vin.createdAt && vin.createdAt !== vin.date ? `<div class="vin-date">Créé : ${this.formatDate(vin.createdAt)} (${this.getTimeAgo(vin.createdAt)})</div>` : ''}
                         </div>
                         <div class="vin-actions">
                             ${vin.image ? `<button class="btn btn-secondary" onclick="tracker.viewImage('${vin.id}')">📷 Voir Image</button>` : ''}
@@ -1505,9 +1541,6 @@
             }
         }
 
-        // Initialize the application
-        const tracker = new VINTracker();
-
         // ========== API CLASS - MISE À JOUR POUR BASE DE DONNÉES ==========
         class VINTrackerAPI {
             constructor() {
@@ -1593,6 +1626,9 @@
                 }
             }
         }
+
+        // Initialize the application
+        const tracker = new VINTracker();
     </script>
 </body>
 </html>
