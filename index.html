@@ -430,12 +430,13 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(10, 28, 43, 0.8);
             animation: fadeIn 0.3s ease;
+            backdrop-filter: blur(5px);
         }
 
         .modal-content {
-            background-color: white;
+            background: linear-gradient(135deg, #FFFFFF 0%, #F0FAFE 100%);
             margin: 15% auto;
             padding: 30px;
             border-radius: 20px;
@@ -443,24 +444,38 @@
             max-width: 500px;
             text-align: center;
             animation: slideUp 0.3s ease;
+            border: 3px solid #7ED3F7;
+            box-shadow: 0 10px 30px rgba(126, 211, 247, 0.3);
         }
 
         .modal-content h3 {
             margin-bottom: 20px;
-            color: #333;
+            color: #0A1C2B;
+            font-size: 1.5em;
+            font-weight: 700;
+        }
+
+        .modal-content p {
+            color: #0A1C2B;
+            margin-bottom: 15px;
+            font-size: 1em;
+            line-height: 1.5;
         }
 
         .close {
-            color: #aaa;
+            color: #D6D9DB;
             float: right;
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
             transition: color 0.3s ease;
+            position: absolute;
+            top: 15px;
+            right: 20px;
         }
 
         .close:hover {
-            color: #333;
+            color: #7ED3F7;
         }
 
         @media (max-width: 768px) {
@@ -737,6 +752,83 @@
         .dashboard-filter:focus {
             outline: none;
             box-shadow: 0 0 0 3px rgba(126, 211, 247, 0.3);
+        }
+
+        /* Modal Improvements */
+        .import-modal {
+            position: relative;
+        }
+
+        .import-warning {
+            background: linear-gradient(135deg, #FFF8DC 0%, #F0FAFE 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border: 2px solid #7ED3F7;
+            text-align: left;
+        }
+
+        .warning-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            color: #0A1C2B;
+            font-size: 1.1em;
+            font-weight: 700;
+        }
+
+        .warning-icon {
+            font-size: 1.3em;
+            margin-right: 10px;
+        }
+
+        .warning-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .warning-list li {
+            padding: 8px 0;
+            color: #0A1C2B;
+            font-size: 0.95em;
+            line-height: 1.4;
+            border-bottom: 1px solid rgba(126, 211, 247, 0.2);
+        }
+
+        .warning-list li:last-child {
+            border-bottom: none;
+        }
+
+        .warning-list strong {
+            color: #7ED3F7;
+            font-weight: 600;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 25px;
+        }
+
+        .modal-btn {
+            min-width: 140px;
+            font-weight: 600;
+        }
+
+        /* Delete Modal Specific */
+        .vin-code {
+            background: #F0FAFE;
+            color: #0A1C2B;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            font-size: 1.2em;
+            letter-spacing: 2px;
+            margin: 15px 0;
+            border: 2px solid #7ED3F7;
         }
     </style>
 </head>
@@ -1066,31 +1158,39 @@
     <div id="deleteModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h3>Confirmer la suppression ?</h3>
-            <p>Êtes-vous sûr de vouloir supprimer ce VIN de la base de données commune ?</p>
-            <p class="vin-code" id="deleteVinCode"></p>
-            <button id="confirmDelete" class="btn btn-danger">Supprimer</button>
-            <button id="cancelDelete" class="btn btn-secondary">Annuler</button>
+            <h3>🗑️ Confirmer la suppression</h3>
+            <p style="color: #5A6B7A;">Êtes-vous sûr de vouloir supprimer ce VIN de la base de données ?</p>
+            <div class="vin-code" id="deleteVinCode"></div>
+            <p style="color: #CC0000; font-weight: 500; font-size: 0.9em;">⚠️ Cette action est irréversible</p>
+            <div class="modal-buttons">
+                <button id="confirmDelete" class="btn btn-danger modal-btn">🗑️ Supprimer</button>
+                <button id="cancelDelete" class="btn btn-secondary modal-btn">❌ Annuler</button>
+            </div>
         </div>
     </div>
 
     <div id="importModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content import-modal">
             <span class="close" id="closeImportModal">&times;</span>
             <h3>📥 Import de fichier Excel</h3>
-            <p>Vous allez importer des VINs depuis un fichier Excel.</p>
-            <div style="background: #fff3cd; padding: 15px; border-radius: 10px; margin: 15px 0; border: 1px solid #ffeaa7;">
-                <h4>⚠️ Important :</h4>
-                <ul style="text-align: left; margin: 10px 0;">
+            <p style="color: #5A6B7A; font-size: 1.1em;">Vous allez importer des VINs depuis un fichier Excel.</p>
+            <div class="import-warning">
+                <div class="warning-header">
+                    <span class="warning-icon">⚠️</span>
+                    <strong>Important :</strong>
+                </div>
+                <ul class="warning-list">
                     <li>• Les VINs déjà existants seront <strong>ignorés</strong></li>
                     <li>• Seuls les VINs valides seront importés</li>
                     <li>• Format supporté : <strong>.xlsx</strong> et <strong>.xls</strong></li>
                     <li>• Taille maximum : <strong>10MB</strong></li>
                 </ul>
             </div>
-            <p>Êtes-vous sûr de vouloir continuer ?</p>
-            <button id="confirmImport" class="btn btn-success">✅ Continuer l'import</button>
-            <button id="cancelImport" class="btn btn-secondary">❌ Annuler</button>
+            <p style="color: #0A1C2B; font-weight: 600; margin-top: 20px;">Êtes-vous sûr de vouloir continuer ?</p>
+            <div class="modal-buttons">
+                <button id="confirmImport" class="btn btn-success modal-btn">✅ Continuer l'import</button>
+                <button id="cancelImport" class="btn btn-secondary modal-btn">❌ Annuler</button>
+            </div>
         </div>
     </div>
 
