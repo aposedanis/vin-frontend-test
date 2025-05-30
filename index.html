@@ -73,6 +73,14 @@
         .header p {
             font-size: 1.1em;
             opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .header .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
         }
 
         .nav-tabs {
@@ -558,7 +566,7 @@
         <div class="header">
             <h1>🚗 VIN Tracker</h1>
             <p>Système de Suivi et d'Enregistrement des Codes VIN - Base de Données Commune <span id="syncIndicator" class="sync-indicator synced"></span></p>
-            <div style="margin-top: 15px;">
+            <div class="button-group">
                 <button id="globalRefreshBtn" class="btn btn-warning">🔄 Actualiser Données</button>
                 <button id="globalExportBtn" class="btn btn-success">📊 Export Excel</button>
             </div>
@@ -1430,7 +1438,7 @@
                             <div class="vin-code">${vin.code}</div>
                             <div class="vin-date">Enregistré : ${this.formatDate(vin.date)}</div>
                             <div class="vin-date" style="color: #11998e; font-weight: 600;">📅 ${this.getTimeAgo(vin.date)}</div>
-                            ${vin.createdAt && vin.createdAt !== vin.date ? `<div class="vin-date">Créé : ${this.formatDate(vin.createdAt)} (${this.getTimeAgo(vin.createdAt)})</div>` : ''}
+                            ${vin.createdAt && vin.createdAt !== vin.date ? `<div class="vin-date">Créé : ${this.formatDate(vin.createdAt)}</div>` : ''}
                         </div>
                         <div class="vin-actions">
                             ${vin.image ? `<button class="btn btn-secondary" onclick="tracker.viewImage('${vin.id}')">📷 Voir Image</button>` : ''}
