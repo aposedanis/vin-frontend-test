@@ -265,6 +265,28 @@
             flex-wrap: wrap;
         }
 
+        .time-filter, .time-unit {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            background: white;
+        }
+
+        .time-filter:focus, .time-unit:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        #timeIntervalControls {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            margin: 10px 0;
+        }
+
         .filter-group label {
             font-weight: 600;
             color: #666;
@@ -647,6 +669,42 @@
                         <input type="date" id="dateFrom">
                         <label>Au :</label>
                         <input type="date" id="dateTo">
+                    </div>
+
+                    <div class="filter-group">
+                        <label>🕐 Filtrer par temps écoulé :</label>
+                        <select id="timeFilterType" class="time-filter">
+                            <option value="">Tous les VINs</option>
+                            <option value="interval">Intervalle personnalisé</option>
+                            <option value="sort-newest">Plus récents en premier</option>
+                            <option value="sort-oldest">Plus anciens en premier</option>
+                        </select>
+                    </div>
+
+                    <div id="timeIntervalControls" class="filter-group" style="display: none;">
+                        <label>Entre :</label>
+                        <input type="number" id="timeFromValue" min="0" placeholder="0" style="width: 80px;">
+                        <select id="timeFromUnit" class="time-unit">
+                            <option value="seconds">secondes</option>
+                            <option value="minutes">minutes</option>
+                            <option value="hours">heures</option>
+                            <option value="days">jours</option>
+                            <option value="weeks">semaines</option>
+                            <option value="months">mois</option>
+                        </select>
+                        <label>et :</label>
+                        <input type="number" id="timeToValue" min="0" placeholder="10" style="width: 80px;">
+                        <select id="timeToUnit" class="time-unit">
+                            <option value="seconds">secondes</option>
+                            <option value="minutes" selected>minutes</option>
+                            <option value="hours">heures</option>
+                            <option value="days">jours</option>
+                            <option value="weeks">semaines</option>
+                            <option value="months">mois</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
                         <button id="filterBtn" class="btn">🔍 Filtrer</button>
                         <button id="clearFilterBtn" class="btn btn-secondary">✖️ Effacer</button>
                         <button id="refreshBtn" class="btn btn-warning">🔄 Actualiser</button>
@@ -713,6 +771,14 @@
                 this.searchInput = document.getElementById('searchInput');
                 this.dateFrom = document.getElementById('dateFrom');
                 this.dateTo = document.getElementById('dateTo');
+                
+                // Time filter elements
+                this.timeFilterType = document.getElementById('timeFilterType');
+                this.timeIntervalControls = document.getElementById('timeIntervalControls');
+                this.timeFromValue = document.getElementById('timeFromValue');
+                this.timeFromUnit = document.getElementById('timeFromUnit');
+                this.timeToValue = document.getElementById('timeToValue');
+                this.timeToUnit = document.getElementById('timeToUnit');
                 
                 // Display elements
                 this.vinList = document.getElementById('vinList');
@@ -786,6 +852,7 @@
                 
                 // Search and filter
                 this.searchInput.addEventListener('input', () => this.filterVINs());
+                this.timeFilterType.addEventListener('change', () => this.handleTimeFilterChange());
                 document.getElementById('filterBtn').addEventListener('click', () => this.filterVINs());
                 document.getElementById('clearFilterBtn').addEventListener('click', () => this.clearFilters());
                 document.getElementById('refreshBtn').addEventListener('click', () => this.refreshData());
@@ -1325,30 +1392,79 @@
                 this.currentVIN = null;
             }
 
-            // ========== RECHERCHE ET FILTRAGE ==========
+            // ========== GESTION DES FILTRES TEMPORELS ==========
+
+            handleTimeFilterChange() {
+                const filterType = this.timeFilterType.value;
+                
+                if (filterType === 'interval') {
+                    this.timeIntervalControls.style.display = 'flex';
+                } else {
+                    this.timeIntervalControls.style.display = 'none';
+                }
+                
+                // Appliquer le filtre automatiquement
+                this.filterVINs();
+            }
+
+            // Convertir une valeur temporelle en millisecondes
+            convertToMilliseconds(value, unit) {
+                const conversions = {
+                    'seconds': 1000,
+                    'minutes': 60 * 1000,
+                    'hours': 60 * 60 * 1000,
+                    'days': 24 * 60 * 60 * 1000,
+                    'weeks': 7 * 24 * 60 * 60 * 1000,
+                    'months': 30 * 24 * 60 * 60 * 1000
+                };
+                return value * conversions[unit];
+            }
+
+            // Calculer l'âge en millisecondes
+            getAgeInMs(dateString) {
+                const now = new Date();
+                const date = new Date(dateString);
+                return now - date;
+            }
+
+            // ========== RECHERCHE ET FILTRAGE AMÉLIORÉ ==========
 
             async filterVINs() {
                 const searchTerm = this.searchInput.value.toUpperCase();
                 const dateFrom = this.dateFrom.value;
                 const dateTo = this.dateTo.value;
+                const timeFilterType = this.timeFilterType.value;
+                
+                let vinsToFilter = [...this.vins]; // Copie des VINs originaux
                 
                 try {
                     this.loadingList.classList.add('active');
                     this.setSyncStatus('syncing');
                     
-                    const api = new VINTrackerAPI();
-                    const response = await api.searchVINs({
-                        q: searchTerm,
-                        dateFrom: dateFrom,
-                        dateTo: dateTo
-                    });
-                    
-                    if (response.success) {
-                        this.displayVINs(response.vins);
-                        this.setSyncStatus('synced');
-                    } else {
-                        throw new Error(response.error);
+                    // Si on a une recherche par texte ou dates, utiliser l'API
+                    if (searchTerm || dateFrom || dateTo) {
+                        const api = new VINTrackerAPI();
+                        const response = await api.searchVINs({
+                            q: searchTerm,
+                            dateFrom: dateFrom,
+                            dateTo: dateTo
+                        });
+                        
+                        if (response.success) {
+                            vinsToFilter = response.vins;
+                        } else {
+                            throw new Error(response.error);
+                        }
                     }
+                    
+                    // Appliquer les filtres temporels côté client
+                    if (timeFilterType) {
+                        vinsToFilter = this.applyTimeFilter(vinsToFilter, timeFilterType);
+                    }
+                    
+                    this.displayVINs(vinsToFilter);
+                    this.setSyncStatus('synced');
+                    
                 } catch (error) {
                     console.error('Erreur lors de la recherche :', error);
                     this.setSyncStatus('error');
@@ -1358,10 +1474,43 @@
                 }
             }
 
+            applyTimeFilter(vins, filterType) {
+                const now = new Date();
+                
+                switch (filterType) {
+                    case 'sort-newest':
+                        return vins.sort((a, b) => new Date(b.date) - new Date(a.date));
+                        
+                    case 'sort-oldest':
+                        return vins.sort((a, b) => new Date(a.date) - new Date(b.date));
+                        
+                    case 'interval':
+                        const fromValue = parseInt(this.timeFromValue.value) || 0;
+                        const fromUnit = this.timeFromUnit.value;
+                        const toValue = parseInt(this.timeToValue.value) || 999999;
+                        const toUnit = this.timeToUnit.value;
+                        
+                        const fromMs = this.convertToMilliseconds(fromValue, fromUnit);
+                        const toMs = this.convertToMilliseconds(toValue, toUnit);
+                        
+                        return vins.filter(vin => {
+                            const ageMs = this.getAgeInMs(vin.date);
+                            return ageMs >= fromMs && ageMs <= toMs;
+                        }).sort((a, b) => new Date(b.date) - new Date(a.date)); // Plus récents en premier
+                        
+                    default:
+                        return vins;
+                }
+            }
+
             clearFilters() {
                 this.searchInput.value = '';
                 this.dateFrom.value = '';
                 this.dateTo.value = '';
+                this.timeFilterType.value = '';
+                this.timeFromValue.value = '';
+                this.timeToValue.value = '';
+                this.timeIntervalControls.style.display = 'none';
                 this.displayVINs();
             }
 
