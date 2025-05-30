@@ -13,9 +13,9 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0A1C2B 0%, #1A2C3B 100%);
             min-height: 100vh;
-            color: #333;
+            color: #D6D9DB;
         }
 
         .container {
@@ -26,7 +26,7 @@
 
         .header {
             text-align: center;
-            color: white;
+            color: #D6D9DB;
             margin-bottom: 30px;
             animation: fadeIn 0.5s ease-in;
         }
@@ -46,15 +46,16 @@
             display: flex;
             justify-content: center;
             margin-bottom: 30px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(10, 28, 43, 0.8);
             border-radius: 15px;
             padding: 5px;
             backdrop-filter: blur(10px);
+            border: 2px solid #7ED3F7;
         }
 
         .nav-tab {
             background: transparent;
-            color: white;
+            color: #D6D9DB;
             border: none;
             padding: 15px 25px;
             border-radius: 10px;
@@ -68,13 +69,14 @@
         }
 
         .nav-tab.active {
-            background: white;
-            color: #333;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            background: #7ED3F7;
+            color: #0A1C2B;
+            box-shadow: 0 4px 15px rgba(126, 211, 247, 0.4);
         }
 
         .nav-tab:hover:not(.active) {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(126, 211, 247, 0.2);
+            border: 1px solid #7ED3F7;
         }
 
         .tab-content {
@@ -87,12 +89,13 @@
         }
 
         .main-card {
-            background: white;
+            background: #FFFFFF;
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
             padding: 30px;
             margin-bottom: 30px;
             animation: slideUp 0.6s ease-out;
+            border: 2px solid #7ED3F7;
         }
 
         .upload-section {
@@ -131,8 +134,8 @@
         }
 
         .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(135deg, #7ED3F7 0%, #5CB8E1 100%);
+            color: #0A1C2B;
             border: none;
             padding: 12px 30px;
             border-radius: 30px;
@@ -141,12 +144,13 @@
             cursor: pointer;
             transition: all 0.3s ease;
             margin: 5px;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 4px 15px rgba(126, 211, 247, 0.4);
         }
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+            box-shadow: 0 6px 20px rgba(126, 211, 247, 0.6);
+            background: linear-gradient(135deg, #5CB8E1 0%, #7ED3F7 100%);
         }
 
         .btn:active {
@@ -154,35 +158,39 @@
         }
 
         .btn-secondary {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+            background: linear-gradient(135deg, #D6D9DB 0%, #B8BCC0 100%);
+            color: #0A1C2B;
+            box-shadow: 0 4px 15px rgba(214, 217, 219, 0.4);
         }
 
         .btn-secondary:hover {
-            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.6);
+            box-shadow: 0 6px 20px rgba(214, 217, 219, 0.6);
+            background: linear-gradient(135deg, #B8BCC0 0%, #D6D9DB 100%);
         }
 
         .btn-danger {
-            background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+            background: linear-gradient(135deg, #CC0000 0%, #FF0000 100%);
+            color: #FFFFFF;
         }
 
         .btn-success {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            box-shadow: 0 4px 15px rgba(17, 153, 142, 0.4);
+            background: linear-gradient(135deg, #7ED3F7 0%, #5CB8E1 100%);
+            color: #0A1C2B;
+            box-shadow: 0 4px 15px rgba(126, 211, 247, 0.4);
         }
 
         .btn-success:hover {
-            box-shadow: 0 6px 20px rgba(17, 153, 142, 0.6);
+            box-shadow: 0 6px 20px rgba(126, 211, 247, 0.6);
         }
 
         .btn-warning {
-            background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
-            box-shadow: 0 4px 15px rgba(247, 151, 30, 0.4);
-            color: #333;
+            background: linear-gradient(135deg, #0A1C2B 0%, #7ED3F7 100%);
+            box-shadow: 0 4px 15px rgba(126, 211, 247, 0.4);
+            color: #FFFFFF;
         }
 
         .btn-warning:hover {
-            box-shadow: 0 6px 20px rgba(247, 151, 30, 0.6);
+            box-shadow: 0 6px 20px rgba(126, 211, 247, 0.6);
         }
 
         .vin-input-group {
@@ -206,13 +214,13 @@
 
         .vin-input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+            border-color: #7ED3F7;
+            box-shadow: 0 0 0 3px rgba(126, 211, 247, 0.3);
         }
 
         .vin-input.valid {
-            border-color: #11998e;
-            background-color: #f0fff4;
+            border-color: #7ED3F7;
+            background-color: #F0FAFE;
         }
 
         .vin-input.invalid {
@@ -227,7 +235,7 @@
         }
 
         .validation-message.valid {
-            color: #11998e;
+            color: #7ED3F7;
         }
 
         .validation-message.invalid {
@@ -252,8 +260,8 @@
 
         .search-input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+            border-color: #7ED3F7;
+            box-shadow: 0 0 0 3px rgba(126, 211, 247, 0.2);
         }
 
         .filter-group {
@@ -275,21 +283,21 @@
 
         .time-filter:focus, .time-unit:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+            border-color: #7ED3F7;
+            box-shadow: 0 0 0 3px rgba(126, 211, 247, 0.2);
         }
 
         #timeIntervalControls {
-            background: #f8f9fa;
+            background: #F0FAFE;
             padding: 15px;
             border-radius: 10px;
-            border: 2px solid #e0e0e0;
+            border: 2px solid #7ED3F7;
             margin: 10px 0;
         }
 
         .filter-group label {
             font-weight: 600;
-            color: #666;
+            color: #0A1C2B;
         }
 
         .filter-group input[type="date"] {
@@ -304,7 +312,7 @@
         }
 
         .vin-item {
-            background: #f8f9fa;
+            background: #F0FAFE;
             border-radius: 15px;
             padding: 20px;
             margin-bottom: 15px;
@@ -317,8 +325,9 @@
 
         .vin-item:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            border-color: #667eea;
+            box-shadow: 0 5px 20px rgba(126, 211, 247, 0.3);
+            border-color: #7ED3F7;
+            background: #FFFFFF;
         }
 
         .vin-info {
@@ -328,13 +337,13 @@
         .vin-code {
             font-size: 1.3em;
             font-weight: 700;
-            color: #333;
+            color: #0A1C2B;
             letter-spacing: 1px;
             margin-bottom: 5px;
         }
 
         .vin-date {
-            color: #666;
+            color: #5A6B7A;
             font-size: 0.9em;
         }
 
@@ -354,8 +363,8 @@
         }
 
         .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
+            border: 3px solid #D6D9DB;
+            border-top: 3px solid #7ED3F7;
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -392,12 +401,13 @@
         }
 
         .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(135deg, #7ED3F7 0%, #5CB8E1 100%);
+            color: #0A1C2B;
             padding: 20px;
             border-radius: 15px;
             text-align: center;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 20px rgba(126, 211, 247, 0.3);
+            border: 2px solid #0A1C2B;
         }
 
         .stat-number {
@@ -523,12 +533,25 @@
         }
 
         .sync-indicator.synced {
-            background-color: #11998e;
+            background-color: #7ED3F7;
         }
 
         .sync-indicator.syncing {
-            background-color: #f7971e;
+            background-color: #5CB8E1;
             animation: pulse 1s infinite;
+        }
+
+        .renault-logo {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            margin-right: 15px;
+            vertical-align: middle;
+        }
+
+        .renault-logo svg {
+            width: 100%;
+            height: 100%;
         }
 
         .sync-indicator.error {
@@ -545,8 +568,42 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🚗 VIN Tracker</h1>
-            <p>Système de Suivi et d'Enregistrement des Codes VIN - Base de Données Commune <span id="syncIndicator" class="sync-indicator synced"></span></p>
+            <h1>
+                <span class="renault-logo">
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Logo GGP Auto inspiré -->
+                        <defs>
+                            <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#D6D9DB"/>
+                                <stop offset="50%" style="stop-color:#7ED3F7"/>
+                                <stop offset="100%" style="stop-color:#D6D9DB"/>
+                            </linearGradient>
+                        </defs>
+                        <!-- Cercle de fond -->
+                        <circle cx="50" cy="50" r="45" 
+                                fill="#0A1C2B" 
+                                stroke="#7ED3F7" 
+                                stroke-width="3"/>
+                        <!-- Texte GGP stylisé -->
+                        <text x="50" y="45" 
+                              font-family="Arial Black, sans-serif" 
+                              font-size="16" 
+                              font-weight="900" 
+                              text-anchor="middle" 
+                              fill="url(#logoGradient)">GGP</text>
+                        <!-- Texte AUTO en dessous -->
+                        <text x="50" y="65" 
+                              font-family="Arial, sans-serif" 
+                              font-size="10" 
+                              font-weight="bold" 
+                              text-anchor="middle" 
+                              fill="#7ED3F7"
+                              letter-spacing="2px">AUTO</text>
+                    </svg>
+                </span>
+                VIN Tracker GGP Auto
+            </h1>
+            <p>Système de Suivi et d'Enregistrement des Codes VIN <span id="syncIndicator" class="sync-indicator synced"></span></p>
             <p id="currentDate" style="font-size: 0.9em; opacity: 0.8; margin-top: 10px;"></p>
         </div>
 
@@ -1650,7 +1707,7 @@
                         <div class="vin-info">
                             <div class="vin-code">${vin.code}</div>
                             <div class="vin-date">📅 Enregistré : ${this.formatDate(vin.date)}</div>
-                            <div class="vin-date" style="color: #667eea; font-weight: 600;">⏰ ${this.getTimeAgo(vin.date)}</div>
+                            <div class="vin-date" style="color: #7ED3F7; font-weight: 600;">⏰ ${this.getTimeAgo(vin.date)}</div>
                         </div>
                         <div class="vin-actions">
                             ${vin.image ? `<button class="btn btn-secondary" onclick="tracker.viewImage('${vin.id}')">📷 Voir Image</button>` : ''}
