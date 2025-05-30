@@ -525,6 +525,7 @@
         <div class="header">
             <h1>🚗 VIN Tracker</h1>
             <p>Système de Suivi et d'Enregistrement des Codes VIN - Base de Données Commune <span id="syncIndicator" class="sync-indicator synced"></span></p>
+            <p id="currentDate" style="font-size: 0.9em; opacity: 0.8; margin-top: 10px;"></p>
         </div>
 
         <!-- Navigation Tabs -->
@@ -684,6 +685,7 @@
                 this.syncIndicator = document.getElementById('syncIndicator');
                 this.initializeElements();
                 this.attachEventListeners();
+                this.updateCurrentDate();
                 this.loadVINsFromDatabase();
                 this.updateStats();
             }
@@ -1371,9 +1373,8 @@
                     <div class="vin-item">
                         <div class="vin-info">
                             <div class="vin-code">${vin.code}</div>
-                            <div class="vin-date">📅 ${this.formatDate(vin.date)}</div>
+                            <div class="vin-date">📅 Enregistré : ${this.formatDate(vin.date)}</div>
                             <div class="vin-date" style="color: #667eea; font-weight: 600;">⏰ ${this.getTimeAgo(vin.date)}</div>
-                            ${vin.createdAt && vin.createdAt !== vin.date ? `<div class="vin-date">🗃️ Créé : ${this.getTimeAgo(vin.createdAt)}</div>` : ''}
                         </div>
                         <div class="vin-actions">
                             ${vin.image ? `<button class="btn btn-secondary" onclick="tracker.viewImage('${vin.id}')">📷 Voir Image</button>` : ''}
@@ -1415,6 +1416,21 @@
                 }
             }
 
+            // Nouvelle fonction pour afficher la date d'aujourd'hui
+            updateCurrentDate() {
+                const now = new Date();
+                const options = { 
+                    weekday: 'long',
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric'
+                };
+                const currentDateElement = document.getElementById('currentDate');
+                if (currentDateElement) {
+                    currentDateElement.textContent = `📅 Aujourd'hui : ${now.toLocaleDateString('fr-FR', options)}`;
+                }
+            }
+
             formatDate(isoDate) {
                 const date = new Date(isoDate);
                 const options = { 
@@ -1427,7 +1443,7 @@
                 return date.toLocaleDateString('fr-FR', options);
             }
 
-            // Nouvelle fonction pour calculer le temps relatif
+            // Fonction pour calculer le temps relatif (simplifiée)
             getTimeAgo(isoDate) {
                 const now = new Date();
                 const date = new Date(isoDate);
