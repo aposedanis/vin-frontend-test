@@ -561,6 +561,7 @@
                         <div id="validationMessage" class="validation-message"></div>
                         <button id="validateBtn" class="btn btn-success" disabled>✓ Valider et Enregistrer</button>
                         <button id="deleteBtn" class="btn btn-danger" style="display: none;">🗑️ Supprimer VIN</button>
+                        <button id="resetBtn" class="btn btn-secondary">🔄 Réinitialiser</button>
                     </div>
 
                     <div id="errorMessage" class="error-message"></div>
@@ -620,6 +621,7 @@
                         <input type="text" id="vinInputRemove" class="vin-input" placeholder="Le code VIN à supprimer apparaîtra ici" maxlength="17">
                         <div id="validationMessageRemove" class="validation-message"></div>
                         <button id="deleteBtnRemove" class="btn btn-danger" disabled>🗑️ Supprimer VIN</button>
+                        <button id="resetBtnRemove" class="btn btn-secondary">🔄 Réinitialiser</button>
                     </div>
 
                     <div id="errorMessageRemove" class="error-message"></div>
@@ -703,6 +705,7 @@
                 this.uploadBtn = document.getElementById('uploadBtn');
                 this.validateBtn = document.getElementById('validateBtn');
                 this.deleteBtn = document.getElementById('deleteBtn');
+                this.resetBtn = document.getElementById('resetBtn');
                 
                 // Input elements
                 this.fileInput = document.getElementById('fileInput');
@@ -743,6 +746,7 @@
                 this.fileInputRemove = document.getElementById('fileInputRemove');
                 this.vinInputRemove = document.getElementById('vinInputRemove');
                 this.deleteBtnRemove = document.getElementById('deleteBtnRemove');
+                this.resetBtnRemove = document.getElementById('resetBtnRemove');
                 this.validationMessageRemove = document.getElementById('validationMessageRemove');
                 this.errorMessageRemove = document.getElementById('errorMessageRemove');
                 this.successMessageRemove = document.getElementById('successMessageRemove');
@@ -764,6 +768,7 @@
                 this.vinInput.addEventListener('input', () => this.validateVIN());
                 this.validateBtn.addEventListener('click', () => this.saveVIN());
                 this.deleteBtn.addEventListener('click', () => this.deleteVIN());
+                this.resetBtn.addEventListener('click', () => this.resetForm());
 
                 // Camera controls for Remove tab
                 this.startCameraBtnRemove.addEventListener('click', () => this.startCameraRemove());
@@ -777,6 +782,7 @@
                 // VIN input and validation for Remove tab
                 this.vinInputRemove.addEventListener('input', () => this.validateVINRemove());
                 this.deleteBtnRemove.addEventListener('click', () => this.deleteVINFromRemove());
+                this.resetBtnRemove.addEventListener('click', () => this.resetFormRemove());
                 
                 // Search and filter
                 this.searchInput.addEventListener('input', () => this.filterVINs());
@@ -1414,6 +1420,57 @@
                         </html>
                     `);
                 }
+            }
+
+            // ========== FONCTIONS DE RÉINITIALISATION ==========
+
+            resetForm() {
+                // Vider et masquer l'image
+                this.capturedImage.style.display = 'none';
+                this.capturedImage.src = '';
+                
+                // Vider le champ de texte
+                this.vinInput.value = '';
+                
+                // Réinitialiser les styles de validation
+                this.vinInput.classList.remove('valid', 'invalid');
+                this.validationMessage.textContent = '';
+                
+                // Réinitialiser les boutons
+                this.validateBtn.disabled = true;
+                this.deleteBtn.style.display = 'none';
+                this.validateBtn.style.display = 'inline-block';
+                
+                // Effacer les messages
+                this.showError('');
+                this.showSuccess('');
+                
+                // Réinitialiser le mode de suppression
+                this.deleteMode = false;
+                
+                console.log('Formulaire d\'ajout réinitialisé');
+            }
+
+            resetFormRemove() {
+                // Vider et masquer l'image
+                this.capturedImageRemove.style.display = 'none';
+                this.capturedImageRemove.src = '';
+                
+                // Vider le champ de texte
+                this.vinInputRemove.value = '';
+                
+                // Réinitialiser les styles de validation
+                this.vinInputRemove.classList.remove('valid', 'invalid');
+                this.validationMessageRemove.textContent = '';
+                
+                // Réinitialiser les boutons
+                this.deleteBtnRemove.disabled = true;
+                
+                // Effacer les messages
+                this.showErrorRemove('');
+                this.showSuccessRemove('');
+                
+                console.log('Formulaire de suppression réinitialisé');
             }
 
             // Nouvelle fonction pour afficher la date d'aujourd'hui
