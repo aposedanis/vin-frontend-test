@@ -607,12 +607,12 @@
                         <div class="stat-label">Enregistrements Aujourd'hui</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number" id="monthVins">0</div>
-                        <div class="stat-label">Enregistrements Ce Mois</div>
+                        <div class="stat-number" id="weekVins">0</div>
+                        <div class="stat-label">Enregistrements Cette Semaine</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number" id="weekVins">0</div>
-                        <div class="stat-label">Cette Semaine</div>
+                        <div class="stat-number" id="monthVins">0</div>
+                        <div class="stat-label">Enregistrements Ce Mois</div>
                     </div>
                 </div>
             </div>
@@ -818,8 +818,8 @@
                 // Stats elements
                 this.totalVinsElement = document.getElementById('totalVins');
                 this.todayVinsElement = document.getElementById('todayVins');
-                this.monthVinsElement = document.getElementById('monthVins');
                 this.weekVinsElement = document.getElementById('weekVins');
+                this.monthVinsElement = document.getElementById('monthVins');
                 
                 // Stream variable
                 this.stream = null;
@@ -1808,8 +1808,8 @@
                     if (response.success) {
                         this.totalVinsElement.textContent = response.stats.total || 0;
                         this.todayVinsElement.textContent = response.stats.today || 0;
-                        this.monthVinsElement.textContent = response.stats.thisMonth || 0;
                         this.weekVinsElement.textContent = response.stats.thisWeek || 0;
+                        this.monthVinsElement.textContent = response.stats.thisMonth || 0;
                     }
                 } catch (error) {
                     console.error('Erreur lors de la mise à jour des statistiques :', error);
@@ -1829,10 +1829,17 @@
                                vinDate.getFullYear() === currentYear;
                     }).length;
                     
+                    const weekCount = this.vins.filter(vin => {
+                        const vinDate = new Date(vin.date);
+                        const oneWeekAgo = new Date();
+                        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                        return vinDate >= oneWeekAgo;
+                    }).length;
+                    
                     this.totalVinsElement.textContent = this.vins.length;
                     this.todayVinsElement.textContent = todayCount;
+                    this.weekVinsElement.textContent = weekCount;
                     this.monthVinsElement.textContent = monthCount;
-                    this.weekVinsElement.textContent = 0;
                 }
             }
 
