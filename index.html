@@ -709,6 +709,8 @@
                         <button id="clearFilterBtn" class="btn btn-secondary">✖️ Effacer</button>
                         <button id="refreshBtn" class="btn btn-warning">🔄 Actualiser</button>
                         <button id="exportBtn" class="btn btn-success">📊 Export Excel</button>
+                        <button id="importBtn" class="btn btn-warning">📥 Import Excel</button>
+                        <input type="file" id="importFileInput" accept=".xlsx,.xls" style="display: none;">
                     </div>
                 </div>
 
@@ -732,6 +734,26 @@
             <p class="vin-code" id="deleteVinCode"></p>
             <button id="confirmDelete" class="btn btn-danger">Supprimer</button>
             <button id="cancelDelete" class="btn btn-secondary">Annuler</button>
+        </div>
+    </div>
+
+    <div id="importModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeImportModal">&times;</span>
+            <h3>📥 Import de fichier Excel</h3>
+            <p>Vous allez importer des VINs depuis un fichier Excel.</p>
+            <div style="background: #fff3cd; padding: 15px; border-radius: 10px; margin: 15px 0; border: 1px solid #ffeaa7;">
+                <h4>⚠️ Important :</h4>
+                <ul style="text-align: left; margin: 10px 0;">
+                    <li>• Les VINs déjà existants seront <strong>ignorés</strong></li>
+                    <li>• Seuls les VINs valides seront importés</li>
+                    <li>• Format supporté : <strong>.xlsx</strong> et <strong>.xls</strong></li>
+                    <li>• Taille maximum : <strong>10MB</strong></li>
+                </ul>
+            </div>
+            <p>Êtes-vous sûr de vouloir continuer ?</p>
+            <button id="confirmImport" class="btn btn-success">✅ Continuer l'import</button>
+            <button id="cancelImport" class="btn btn-secondary">❌ Annuler</button>
         </div>
     </div>
 
@@ -791,6 +813,7 @@
                 // Modal elements
                 this.deleteModal = document.getElementById('deleteModal');
                 this.deleteVinCode = document.getElementById('deleteVinCode');
+                this.importModal = document.getElementById('importModal');
                 
                 // Stats elements
                 this.totalVinsElement = document.getElementById('totalVins');
@@ -857,11 +880,21 @@
                 document.getElementById('clearFilterBtn').addEventListener('click', () => this.clearFilters());
                 document.getElementById('refreshBtn').addEventListener('click', () => this.refreshData());
                 document.getElementById('exportBtn').addEventListener('click', () => this.exportToExcel());
+                document.getElementById('importBtn').addEventListener('click', () => this.selectImportFile());
+                
+                // Import file handling
+                this.importFileInput = document.getElementById('importFileInput');
+                this.importFileInput.addEventListener('change', (e) => this.handleImportFile(e));
                 
                 // Modal controls
                 document.querySelector('.close').addEventListener('click', () => this.closeModal());
                 document.getElementById('confirmDelete').addEventListener('click', () => this.confirmDelete());
                 document.getElementById('cancelDelete').addEventListener('click', () => this.closeModal());
+
+                // Import modal controls
+                document.getElementById('closeImportModal').addEventListener('click', () => this.closeImportModal());
+                document.getElementById('confirmImport').addEventListener('click', () => this.confirmImport());
+                document.getElementById('cancelImport').addEventListener('click', () => this.closeImportModal());
 
                 // Tab navigation
                 document.querySelectorAll('.nav-tab').forEach(tab => {
@@ -884,6 +917,94 @@
                 // Update data if viewing
                 if (tabId === 'view-vins') {
                     this.refreshData();
+                }
+            }
+
+            // ========== IMPORT EXCEL ==========
+
+            selectImportFile() {
+                this.importModal.style.display = 'block';
+            }
+
+            confirmImport() {
+                this.closeImportModal();
+                this.importFileInput.click();
+            }
+
+            closeImportModal() {
+                this.importModal.style.display = 'none';
+            }
+
+            async handleImportFile(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                // Vérifier le type de fichier
+                if (!file.name.match(/\.(xlsx|xls)$/i)) {
+                    this.showError('Veuillez sélectionner un fichier Excel (.xlsx ou .xls)');
+                    return;
+                }
+
+                // Vérifier la taille (max 10MB)
+                if (file.size > 10 * 1024 * 1024) {
+                    this.showError('Le fichier est trop volumineux. Taille maximum : 10MB');
+                    return;
+                }
+
+                try {
+                    this.setSyncStatus('syncing');
+                    this.loadingList.classList.add('active');
+
+                    const formData = new FormData();
+                    formData.append('excelFile', file);
+
+                    const response = await fetch('/api/vins/import', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        // Afficher le résumé de l'import
+                        let message = `✅ Import réussi !\n\n`;
+                        message += `📊 Résumé :\n`;
+                        message += `• ${result.details.importedCount} VINs importés\n`;
+                        
+                        if (result.details.duplicatesCount > 0) {
+                            message += `• ${result.details.duplicatesCount} doublons ignorés\n`;
+                        }
+                        
+                        if (result.details.errorsCount > 0) {
+                            message += `• ${result.details.errorsCount} erreurs\n`;
+                        }
+
+                        this.showSuccess(message);
+
+                        // Recharger les données
+                        await this.loadVINsFromDatabase();
+                        this.updateStats();
+
+                        // Afficher les erreurs si il y en a
+                        if (result.details.errorsList && result.details.errorsList.length > 0) {
+                            console.warn('Erreurs d\'import :', result.details.errorsList);
+                            setTimeout(() => {
+                                this.showError(`Erreurs détectées :\n${result.details.errorsList.slice(0, 5).join('\n')}`);
+                            }, 3000);
+                        }
+
+                    } else {
+                        throw new Error(result.error);
+                    }
+
+                } catch (error) {
+                    console.error('Erreur lors de l\'import :', error);
+                    this.showError(`Erreur lors de l'import : ${error.message}`);
+                } finally {
+                    this.setSyncStatus('synced');
+                    this.loadingList.classList.remove('active');
+                    // Réinitialiser l'input file
+                    event.target.value = '';
                 }
             }
 
@@ -1823,6 +1944,19 @@
                     return await response.json();
                 } catch (error) {
                     console.error('Erreur lors de la récupération des statistiques :', error);
+                    return { success: false, error: error.message };
+                }
+            }
+
+            async importFromExcel(fileData) {
+                try {
+                    const response = await fetch(`${this.baseURL}/vins/import`, {
+                        method: 'POST',
+                        body: fileData
+                    });
+                    return await response.json();
+                } catch (error) {
+                    console.error('Erreur lors de l\'import Excel :', error);
                     return { success: false, error: error.message };
                 }
             }
