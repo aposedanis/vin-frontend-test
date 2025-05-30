@@ -957,6 +957,9 @@
                     const api = new VINTrackerAPI();
                     const response = await api.processImageOCR(imageData);
 
+                    // Debug : Afficher la réponse complète
+                    console.log('Réponse OCR complète :', response);
+
                     let extractedVIN = null;
                     if (response.success && response.vin) {
                         extractedVIN = response.vin;
@@ -979,9 +982,26 @@
                             this.validateBtn.style.display = 'inline-block';
                         }
                     } else {
-                        this.showError('Impossible d\'extraire un code VIN valide de l\'image.');
+                        // Debug amélioré
+                        let errorMsg = 'Impossible d\'extraire un code VIN valide de l\'image.';
+                        if (response.allText) {
+                            errorMsg += ' Texte détecté : ' + response.allText.substring(0, 100) + '...';
+                        }
+                        if (response.message) {
+                            errorMsg += ' Message : ' + response.message;
+                        }
+                        this.showError(errorMsg);
+                        
+                        // Afficher dans la console pour debug
+                        console.log('Réponse OCR détaillée :', {
+                            success: response.success,
+                            vin: response.vin,
+                            message: response.message,
+                            allText: response.allText
+                        });
                     }
                 } catch (error) {
+                    console.error('Erreur complète :', error);
                     this.showError('Erreur lors du traitement de l\'image : ' + error.message);
                 } finally {
                     this.loading.classList.remove('active');
