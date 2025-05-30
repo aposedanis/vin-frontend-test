@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VIN Tracker - Système de Suivi des Véhicules</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -563,6 +564,180 @@
             50% { opacity: 0.5; }
             100% { opacity: 1; }
         }
+
+        /* Dashboard Styles */
+        .kpi-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .kpi-card {
+            background: linear-gradient(135deg, #7ED3F7 0%, #5CB8E1 100%);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 5px 20px rgba(126, 211, 247, 0.3);
+            border: 2px solid #0A1C2B;
+            transition: transform 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(126, 211, 247, 0.4);
+        }
+
+        .kpi-icon {
+            font-size: 2.5em;
+            margin-right: 15px;
+            color: #0A1C2B;
+        }
+
+        .kpi-content {
+            flex: 1;
+        }
+
+        .kpi-number {
+            font-size: 2.2em;
+            font-weight: 700;
+            color: #0A1C2B;
+            line-height: 1;
+        }
+
+        .kpi-label {
+            font-size: 0.9em;
+            color: #0A1C2B;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            background: #F0FAFE;
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #7ED3F7;
+            box-shadow: 0 5px 20px rgba(126, 211, 247, 0.2);
+        }
+
+        .chart-container.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .chart-container h3 {
+            color: #0A1C2B;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            text-align: center;
+        }
+
+        .chart-container canvas {
+            max-width: 100%;
+            height: 300px;
+        }
+
+        .performance-indicators {
+            display: grid;
+            gap: 20px;
+        }
+
+        .indicator {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #FFFFFF;
+            border-radius: 10px;
+            border-left: 4px solid #7ED3F7;
+        }
+
+        .indicator-label {
+            font-weight: 600;
+            color: #0A1C2B;
+        }
+
+        .indicator-value {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #7ED3F7;
+        }
+
+        .indicator-trend {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .indicator-trend.up {
+            color: #28a745;
+        }
+
+        .indicator-trend.down {
+            color: #dc3545;
+        }
+
+        .indicator-trend.stable {
+            color: #6c757d;
+        }
+
+        .top-vins-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .top-vin-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            background: #FFFFFF;
+            border-radius: 8px;
+            border-left: 3px solid #7ED3F7;
+        }
+
+        .top-vin-code {
+            font-weight: 600;
+            color: #0A1C2B;
+        }
+
+        .top-vin-duration {
+            color: #7ED3F7;
+            font-weight: 500;
+        }
+
+        .dashboard-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-top: 30px;
+            padding: 20px;
+            background: #F0FAFE;
+            border-radius: 15px;
+            border: 2px solid #7ED3F7;
+        }
+
+        .dashboard-filter {
+            padding: 10px 15px;
+            border: 2px solid #7ED3F7;
+            border-radius: 8px;
+            background: #FFFFFF;
+            color: #0A1C2B;
+            font-weight: 500;
+        }
+
+        .dashboard-filter:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(126, 211, 247, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -612,6 +787,7 @@
             <button class="nav-tab active" data-tab="add-vin">➕ Ajouter VIN</button>
             <button class="nav-tab" data-tab="remove-vin">➖ Supprimer VIN</button>
             <button class="nav-tab" data-tab="view-vins">👁️ Consulter VINs</button>
+            <button class="nav-tab" data-tab="dashboard">📊 Tableau de Bord</button>
         </div>
 
         <!-- Tab 1: Ajouter VIN -->
@@ -710,6 +886,110 @@
                         <div class="spinner"></div>
                         <p>Traitement de l'image avec OCR...</p>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 4: Tableau de Bord -->
+        <div id="dashboard" class="tab-content">
+            <div class="main-card">
+                <h2 style="text-align: center; color: #0A1C2B; margin-bottom: 30px;">📊 Tableau de Bord - Parc Auto GGP</h2>
+                
+                <!-- KPI Cards -->
+                <div class="kpi-section">
+                    <div class="kpi-card">
+                        <div class="kpi-icon">🚗</div>
+                        <div class="kpi-content">
+                            <div class="kpi-number" id="totalVehicles">0</div>
+                            <div class="kpi-label">Véhicules Total</div>
+                        </div>
+                    </div>
+                    
+                    <div class="kpi-card">
+                        <div class="kpi-icon">📈</div>
+                        <div class="kpi-content">
+                            <div class="kpi-number" id="monthlyEntries">0</div>
+                            <div class="kpi-label">Entrées ce mois</div>
+                        </div>
+                    </div>
+                    
+                    <div class="kpi-card">
+                        <div class="kpi-icon">📉</div>
+                        <div class="kpi-content">
+                            <div class="kpi-number" id="monthlyExits">0</div>
+                            <div class="kpi-label">Sorties ce mois</div>
+                        </div>
+                    </div>
+                    
+                    <div class="kpi-card">
+                        <div class="kpi-icon">⏱️</div>
+                        <div class="kpi-content">
+                            <div class="kpi-number" id="avgStayTime">0j</div>
+                            <div class="kpi-label">Séjour moyen</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Charts Section -->
+                <div class="charts-section">
+                    <!-- Entrées vs Sorties par mois -->
+                    <div class="chart-container">
+                        <h3>📊 Entrées vs Sorties par Mois</h3>
+                        <canvas id="entryExitChart"></canvas>
+                    </div>
+                    
+                    <!-- Répartition du temps de séjour -->
+                    <div class="chart-container">
+                        <h3>⏰ Répartition par Temps de Séjour</h3>
+                        <canvas id="stayTimeChart"></canvas>
+                    </div>
+                    
+                    <!-- Évolution du parc sur 12 mois -->
+                    <div class="chart-container full-width">
+                        <h3>📈 Évolution du Parc Auto (12 derniers mois)</h3>
+                        <canvas id="fleetEvolutionChart"></canvas>
+                    </div>
+                    
+                    <!-- Indicateurs de performance -->
+                    <div class="chart-container">
+                        <h3>🎯 Indicateurs de Performance</h3>
+                        <div class="performance-indicators">
+                            <div class="indicator">
+                                <div class="indicator-label">Taux de rotation mensuel</div>
+                                <div class="indicator-value" id="rotationRate">0%</div>
+                                <div class="indicator-trend" id="rotationTrend">→</div>
+                            </div>
+                            <div class="indicator">
+                                <div class="indicator-label">Occupation moyenne</div>
+                                <div class="indicator-value" id="occupancyRate">0%</div>
+                                <div class="indicator-trend" id="occupancyTrend">→</div>
+                            </div>
+                            <div class="indicator">
+                                <div class="indicator-label">Pic d'activité</div>
+                                <div class="indicator-value" id="peakActivity">--:--</div>
+                                <div class="indicator-trend" id="peakTrend">→</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Top VINs par durée -->
+                    <div class="chart-container">
+                        <h3>🏆 Top 10 - Plus Long Séjour</h3>
+                        <div id="topVinsList" class="top-vins-list">
+                            <!-- Dynamically populated -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Controls -->
+                <div class="dashboard-controls">
+                    <button id="refreshDashboard" class="btn btn-warning">🔄 Actualiser Données</button>
+                    <button id="exportDashboard" class="btn btn-success">📊 Export Rapport</button>
+                    <select id="dashboardPeriod" class="dashboard-filter">
+                        <option value="3">3 derniers mois</option>
+                        <option value="6">6 derniers mois</option>
+                        <option value="12" selected>12 derniers mois</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -878,6 +1158,22 @@
                 this.weekVinsElement = document.getElementById('weekVins');
                 this.monthVinsElement = document.getElementById('monthVins');
                 
+                // Dashboard elements
+                this.dashboardElements = {
+                    totalVehicles: document.getElementById('totalVehicles'),
+                    monthlyEntries: document.getElementById('monthlyEntries'),
+                    monthlyExits: document.getElementById('monthlyExits'),
+                    avgStayTime: document.getElementById('avgStayTime'),
+                    rotationRate: document.getElementById('rotationRate'),
+                    occupancyRate: document.getElementById('occupancyRate'),
+                    peakActivity: document.getElementById('peakActivity'),
+                    topVinsList: document.getElementById('topVinsList'),
+                    dashboardPeriod: document.getElementById('dashboardPeriod')
+                };
+                
+                // Chart variables
+                this.charts = {};
+                
                 // Stream variable
                 this.stream = null;
 
@@ -937,6 +1233,11 @@
                 document.getElementById('clearFilterBtn').addEventListener('click', () => this.clearFilters());
                 document.getElementById('refreshBtn').addEventListener('click', () => this.refreshData());
                 document.getElementById('exportBtn').addEventListener('click', () => this.exportToExcel());
+                
+                // Dashboard controls
+                document.getElementById('refreshDashboard').addEventListener('click', () => this.refreshDashboard());
+                document.getElementById('exportDashboard').addEventListener('click', () => this.exportDashboardReport());
+                this.dashboardElements.dashboardPeriod.addEventListener('change', () => this.updateDashboardPeriod());
                 document.getElementById('importBtn').addEventListener('click', () => this.selectImportFile());
                 
                 // Import file handling
@@ -975,6 +1276,286 @@
                 if (tabId === 'view-vins') {
                     this.refreshData();
                 }
+            }
+
+            // ========== DASHBOARD METHODS ==========
+
+            async updateDashboard() {
+                try {
+                    this.setSyncStatus('syncing');
+                    await this.loadVINsFromDatabase();
+                    this.calculateDashboardMetrics();
+                    this.updateDashboardCharts();
+                    this.setSyncStatus('synced');
+                } catch (error) {
+                    console.error('Erreur mise à jour dashboard :', error);
+                    this.setSyncStatus('error');
+                }
+            }
+
+            calculateDashboardMetrics() {
+                const now = new Date();
+                const currentMonth = now.getMonth();
+                const currentYear = now.getFullYear();
+                
+                // Calculs de base
+                const totalVehicles = this.vins.length;
+                const monthlyEntries = this.vins.filter(vin => {
+                    const vinDate = new Date(vin.date);
+                    return vinDate.getMonth() === currentMonth && vinDate.getFullYear() === currentYear;
+                }).length;
+                
+                // Simulation sorties (pour démo - à adapter selon votre logique métier)
+                const monthlyExits = Math.floor(monthlyEntries * 0.8); // 80% des entrées ressortent
+                
+                // Calcul temps de séjour moyen
+                const avgStayDays = this.calculateAverageStayTime();
+                
+                // Taux de rotation mensuel
+                const rotationRate = totalVehicles > 0 ? Math.round((monthlyEntries / totalVehicles) * 100) : 0;
+                
+                // Taux d'occupation (simulation)
+                const occupancyRate = Math.min(95, Math.round((totalVehicles / 100) * 100)); // Base sur 100 places
+                
+                // Pic d'activité (simulation basée sur les heures d'enregistrement)
+                const peakActivity = this.calculatePeakActivity();
+                
+                // Mise à jour de l'interface
+                this.dashboardElements.totalVehicles.textContent = totalVehicles;
+                this.dashboardElements.monthlyEntries.textContent = monthlyEntries;
+                this.dashboardElements.monthlyExits.textContent = monthlyExits;
+                this.dashboardElements.avgStayTime.textContent = `${avgStayDays}j`;
+                this.dashboardElements.rotationRate.textContent = `${rotationRate}%`;
+                this.dashboardElements.occupancyRate.textContent = `${occupancyRate}%`;
+                this.dashboardElements.peakActivity.textContent = peakActivity;
+                
+                // Top VINs par durée
+                this.updateTopVinsList();
+            }
+
+            calculateAverageStayTime() {
+                if (this.vins.length === 0) return 0;
+                
+                const now = new Date();
+                const totalDays = this.vins.reduce((sum, vin) => {
+                    const vinDate = new Date(vin.date);
+                    const daysDiff = Math.floor((now - vinDate) / (1000 * 60 * 60 * 24));
+                    return sum + daysDiff;
+                }, 0);
+                
+                return Math.round(totalDays / this.vins.length);
+            }
+
+            calculatePeakActivity() {
+                const hourCounts = new Array(24).fill(0);
+                
+                this.vins.forEach(vin => {
+                    const hour = new Date(vin.date).getHours();
+                    hourCounts[hour]++;
+                });
+                
+                const maxCount = Math.max(...hourCounts);
+                const peakHour = hourCounts.indexOf(maxCount);
+                
+                return `${peakHour.toString().padStart(2, '0')}:00`;
+            }
+
+            updateTopVinsList() {
+                const vinsWithDuration = this.vins.map(vin => ({
+                    ...vin,
+                    duration: Math.floor((new Date() - new Date(vin.date)) / (1000 * 60 * 60 * 24))
+                })).sort((a, b) => b.duration - a.duration).slice(0, 10);
+                
+                this.dashboardElements.topVinsList.innerHTML = vinsWithDuration.map((vin, index) => `
+                    <div class="top-vin-item">
+                        <span class="top-vin-rank">#${index + 1}</span>
+                        <span class="top-vin-code">${vin.code}</span>
+                        <span class="top-vin-duration">${vin.duration} jours</span>
+                    </div>
+                `).join('');
+            }
+
+            updateDashboardCharts() {
+                this.createEntryExitChart();
+                this.createStayTimeChart();
+                this.createFleetEvolutionChart();
+            }
+
+            createEntryExitChart() {
+                const ctx = document.getElementById('entryExitChart');
+                if (!ctx) return;
+                
+                // Détruire le graphique existant
+                if (this.charts.entryExit) {
+                    this.charts.entryExit.destroy();
+                }
+                
+                // Données simulées pour les 6 derniers mois
+                const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun'];
+                const entries = [12, 19, 8, 15, 22, 18];
+                const exits = [10, 15, 6, 12, 18, 14];
+                
+                this.charts.entryExit = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: months,
+                        datasets: [{
+                            label: 'Entrées',
+                            data: entries,
+                            backgroundColor: '#7ED3F7',
+                            borderColor: '#5CB8E1',
+                            borderWidth: 2
+                        }, {
+                            label: 'Sorties',
+                            data: exits,
+                            backgroundColor: '#D6D9DB',
+                            borderColor: '#B8BCC0',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            createStayTimeChart() {
+                const ctx = document.getElementById('stayTimeChart');
+                if (!ctx) return;
+                
+                if (this.charts.stayTime) {
+                    this.charts.stayTime.destroy();
+                }
+                
+                // Calcul réel des catégories de temps de séjour
+                const categories = {
+                    '0-7 jours': 0,
+                    '1-4 semaines': 0,
+                    '1-3 mois': 0,
+                    '3-6 mois': 0,
+                    '6+ mois': 0
+                };
+                
+                const now = new Date();
+                this.vins.forEach(vin => {
+                    const days = Math.floor((now - new Date(vin.date)) / (1000 * 60 * 60 * 24));
+                    
+                    if (days <= 7) categories['0-7 jours']++;
+                    else if (days <= 28) categories['1-4 semaines']++;
+                    else if (days <= 90) categories['1-3 mois']++;
+                    else if (days <= 180) categories['3-6 mois']++;
+                    else categories['6+ mois']++;
+                });
+                
+                this.charts.stayTime = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(categories),
+                        datasets: [{
+                            data: Object.values(categories),
+                            backgroundColor: [
+                                '#7ED3F7',
+                                '#5CB8E1',
+                                '#4A9BC7',
+                                '#3A7FA3',
+                                '#2A627F'
+                            ],
+                            borderWidth: 2,
+                            borderColor: '#FFFFFF'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+
+            createFleetEvolutionChart() {
+                const ctx = document.getElementById('fleetEvolutionChart');
+                if (!ctx) return;
+                
+                if (this.charts.fleetEvolution) {
+                    this.charts.fleetEvolution.destroy();
+                }
+                
+                // Génération des données d'évolution sur 12 mois
+                const months = [];
+                const fleetSize = [];
+                const now = new Date();
+                
+                for (let i = 11; i >= 0; i--) {
+                    const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                    const monthName = date.toLocaleDateString('fr-FR', { month: 'short' });
+                    months.push(monthName);
+                    
+                    // Calcul du nombre de véhicules présents à cette date
+                    const vehiclesAtDate = this.vins.filter(vin => new Date(vin.date) <= date).length;
+                    fleetSize.push(vehiclesAtDate);
+                }
+                
+                this.charts.fleetEvolution = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: months,
+                        datasets: [{
+                            label: 'Taille du parc',
+                            data: fleetSize,
+                            borderColor: '#7ED3F7',
+                            backgroundColor: 'rgba(126, 211, 247, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            async refreshDashboard() {
+                await this.updateDashboard();
+                this.showSuccess('Tableau de bord actualisé avec succès !');
+            }
+
+            exportDashboardReport() {
+                // Simulation d'export de rapport
+                this.showSuccess('Export du rapport en cours... (Fonctionnalité à implémenter)');
+            }
+
+            updateDashboardPeriod() {
+                const period = this.dashboardElements.dashboardPeriod.value;
+                // Mise à jour des graphiques selon la période sélectionnée
+                this.updateDashboardCharts();
+                this.showSuccess(`Période mise à jour : ${period} mois`);
             }
 
             // ========== IMPORT EXCEL ==========
