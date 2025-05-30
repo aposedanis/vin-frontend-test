@@ -1,4 +1,37 @@
-<!DOCTYPE html>
+// ========== FONCTIONS UTILITAIRES ==========
+
+            getTimeAgo(dateString) {
+                const now = new Date();
+                const date = new Date(dateString);
+                const diffInSeconds = Math.floor((now - date) / 1000);
+                
+                if (diffInSeconds < 60) {
+                    return `il y a ${diffInSeconds} seconde${diffInSeconds > 1 ? 's' : ''}`;
+                }
+                
+                const diffInMinutes = Math.floor(diffInSeconds / 60);
+                if (diffInMinutes < 60) {
+                    return `il y a ${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''}`;
+                }
+                
+                const diffInHours = Math.floor(diffInMinutes / 60);
+                if (diffInHours < 24) {
+                    return `il y a ${diffInHours} heure${diffInHours > 1 ? 's' : ''}`;
+                }
+                
+                const diffInDays = Math.floor(diffInHours / 24);
+                if (diffInDays < 30) {
+                    return `il y a ${diffInDays} jour${diffInDays > 1 ? 's' : ''}`;
+                }
+                
+                const diffInMonths = Math.floor(diffInDays / 30);
+                if (diffInMonths < 12) {
+                    return `il y a ${diffInMonths} mois`;
+                }
+                
+                const diffInYears = Math.floor(diffInMonths / 12);
+                return `il y a ${diffInYears} an${diffInYears > 1 ? 's' : ''}`;
+            }<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -822,22 +855,44 @@
 
             async loadVINsFromDatabase() {
                 this.setSyncStatus('syncing');
+                console.log('🔄 Début chargement VINs depuis la base...');
+                
                 try {
                     const api = new VINTrackerAPI();
                     const response = await api.getAllVINs();
                     
-                    if (response.success) {
-                        this.vins = response.vins;
+                    console.log('📡 Réponse API getAllVINs:', response);
+                    
+                    if (response && response.success) {
+                        this.vins = response.vins || [];
+                        console.log('✅ VINs chargés:', this.vins.length, 'éléments');
+                        console.log('📋 Liste VINs:', this.vins);
+                        
                         this.setSyncStatus('synced');
                         this.displayVINs();
                         this.updateStats();
+                        
+                        // Masquer message d'erreur si succès
+                        this.showError('');
                     } else {
-                        throw new Error(response.error || 'Erreur lors du chargement');
+                        console.error('❌ Réponse API invalide:', response);
+                        throw new Error(response?.error || 'Réponse API invalide');
                     }
                 } catch (error) {
-                    console.error('Erreur lors du chargement des VINs :', error);
+                    console.error('💥 Erreur complète lors du chargement des VINs :', error);
                     this.setSyncStatus('error');
-                    this.showError('Impossible de charger les données depuis la base de données.');
+                    this.showError('Impossible de charger les données depuis la base de données: ' + error.message);
+                    
+                    // Affichage de debug en cas d'erreur
+                    console.log('🔧 Tentative de diagnostic...');
+                    try {
+                        const testResponse = await fetch('/api/vins');
+                        console.log('🔍 Status réponse directe:', testResponse.status);
+                        const testText = await testResponse.text();
+                        console.log('📝 Réponse brute:', testText.substring(0, 200));
+                    } catch (testError) {
+                        console.log('❌ Erreur test fetch:', testError);
+                    }
                 }
             }
 
@@ -1516,10 +1571,19 @@
 
             async getAllVINs() {
                 try {
+                    console.log('📡 Appel API getAllVINs...');
                     const response = await fetch(`${this.baseURL}/vins`);
-                    return await response.json();
+                    console.log('📊 Status response:', response.status, response.statusText);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
+                    const data = await response.json();
+                    console.log('✅ Données reçues:', data);
+                    return data;
                 } catch (error) {
-                    console.error('Erreur lors de la récupération des VINs :', error);
+                    console.error('❌ Erreur dans getAllVINs :', error);
                     return { success: false, error: error.message };
                 }
             }
