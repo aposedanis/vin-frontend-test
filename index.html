@@ -322,6 +322,7 @@
             align-items: center;
             transition: all 0.3s ease;
             border: 2px solid transparent;
+            min-height: 80px;
         }
 
         .vin-item:hover {
@@ -351,6 +352,9 @@
         .vin-actions {
             display: flex;
             gap: 10px;
+            align-items: center;
+            flex-shrink: 0;
+            margin-left: 15px;
         }
 
         .loading {
@@ -507,11 +511,22 @@
 
             .vin-item {
                 flex-direction: column;
-                text-align: center;
+                text-align: left;
+                align-items: flex-start;
             }
 
             .vin-actions {
                 margin-top: 15px;
+                margin-left: 0;
+                align-self: center;
+            }
+            
+            .vin-info-row {
+                justify-content: flex-start;
+            }
+
+            .vin-status-badge {
+                margin-left: auto;
             }
 
             .modal-content {
@@ -817,6 +832,38 @@
             letter-spacing: 2px;
             margin: 15px 0;
             border: 2px solid #7ED3F7;
+        }
+        /* Styles pour les VINs plus visuels */
+        .vin-info-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .vin-info-icon {
+            margin-right: 8px;
+            font-size: 1.1em;
+            width: 20px;
+            text-align: center;
+        }
+
+        .vin-status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .status-recent {
+            background: linear-gradient(135deg, #7ED3F7 0%, #5CB8E1 100%);
+            color: #0A1C2B;
+        }
+
+        .status-old {
+            background: linear-gradient(135deg, #D6D9DB 0%, #B8BCC0 100%);
+            color: #0A1C2B;
         }
     </style>
 </head>
@@ -2334,25 +2381,44 @@
 
             displayVINs(vinsToDisplay = this.vins) {
                 this.loadingList.classList.remove('active');
-                
+    
                 if (vinsToDisplay.length === 0) {
-                    this.vinList.innerHTML = '<p style="text-align: center; color: #666;">Aucun VIN enregistré trouvé dans la base de données commune.</p>';
+                    this.vinList.innerHTML = '<p style="text-align: center; color: #666;">Aucun VIN enregistré trouvé dans la base de données.</p>';
                     return;
                 }
-                
-                this.vinList.innerHTML = vinsToDisplay.map(vin => `
-                    <div class="vin-item">
-                        <div class="vin-info">
-                            <div class="vin-code">${vin.code}</div>
-                            <div class="vin-date">📅 Enregistré : ${this.formatDate(vin.date)}</div>
-                            <div class="vin-date" style="color: #7ED3F7; font-weight: 600;">⏰ ${this.getTimeAgo(vin.date)}</div>
+    
+                this.vinList.innerHTML = vinsToDisplay.map(vin => {
+                    const timeAgo = this.getTimeAgo(vin.date);
+                    const isRecent = this.isRecentVin(vin.date);
+                    const statusClass = isRecent ? 'status-recent' : 'status-old';
+                    const statusText = isRecent ? 'RÉCENT' : 'ANCIEN';
+        
+                    return `
+                        <div class="vin-item">
+                            <div class="vin-info">
+                                <div class="vin-info-row">
+                                    <span class="vin-info-icon">🚗</span>
+                                    <div class="vin-code">${vin.code}</div>
+                                    <span class="vin-status-badge ${statusClass}">${statusText}</span>
+                            </div>
+                            <div class="vin-info-row">
+                                <span class="vin-info-icon">📅</span>
+                                <div class="vin-date">Enregistré : ${this.formatDate(vin.date)}</div>
+                            </div>
+                            <div class="vin-info-row">
+                                <span class="vin-info-icon">⏰</span>
+                                <div class="vin-date" style="color: #7ED3F7; font-weight: 600;">${timeAgo}</div>
+                            </div>
                         </div>
                         <div class="vin-actions">
-                            <button class="btn btn-danger" onclick="tracker.deleteVINById(${vin.id})">🗑️ Supprimer</button>
-                        </div>
+                            <button class="btn btn-danger" onclick="tracker.deleteVINById(${vin.id})" title="Supprimer ce VIN">
+                                🗑️ Supprimer
+                        </button>
+                      </div>
                     </div>
-                `).join('');
-            }
+                `;
+            }).join('');
+        }
 
             // ========== FONCTIONS DE RÉINITIALISATION ==========
 
@@ -2545,6 +2611,14 @@
                         this.successMessageRemove.style.display = 'none';
                     }, 3000);
                 }
+            }
+
+            // Fonction pour déterminer si un VIN est récent
+            isRecentVin(dateString) {
+                const now = new Date();
+                const vinDate = new Date(dateString);
+                const diffInDays = Math.floor((now - vinDate) / (1000 * 60 * 60 * 24));
+                return diffInDays <= 7; // Récent si moins de 7 jours
             }
         }
 
