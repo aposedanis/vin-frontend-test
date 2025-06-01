@@ -1386,6 +1386,7 @@
                     this.refreshData();
                 } else if (tabId === 'add-vin') {
                     this.updateStats();
+                }
             }
 
             // ========== DASHBOARD METHODS ==========
@@ -2558,12 +2559,6 @@
                         this.todayVinsElement.textContent = response.stats.today || 0;
                         this.weekVinsElement.textContent = response.stats.thisWeek || 0;
                         this.monthVinsElement.textContent = response.stats.thisMonth || 0;
-
-                        // AJOUTER : Statistiques pour l'onglet Supprimer (mêmes valeurs)
-                        this.totalVinsElementRemove.textContent = response.stats.total || 0;
-                        this.todayVinsElementRemove.textContent = response.stats.today || 0;
-                        this.weekVinsElementRemove.textContent = response.stats.thisWeek || 0;
-                        this.monthVinsElementRemove.textContent = response.stats.thisMonth || 0;
                     }
                 } catch (error) {
                     console.error('Erreur lors de la mise à jour des statistiques :', error);
@@ -2746,15 +2741,6 @@
                 }
             }
 
-            async getDeletionStats() {
-                try {
-                    const response = await fetch(`${this.baseURL}/vins/deletion-stats`);
-                    return await response.json();
-                } catch (error) {
-                    console.error('Erreur lors de la récupération des stats de suppression :', error);
-                    return { success: false, error: error.message };
-                }
-            }
         }
 
         // Initialize the application
