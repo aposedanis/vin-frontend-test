@@ -870,6 +870,21 @@
             background: linear-gradient(135deg, #D6D9DB 0%, #B8BCC0 100%);
             color: #0A1C2B;
         }
+
+        .stat-card-delete {
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%) !important;
+            color: #FFFFFF !important;
+            border: 2px solid #CC0000 !important;
+        }
+
+        .stat-card-delete .stat-number {
+            color: #FFFFFF !important;
+        }
+
+        .stat-card-delete .stat-label {
+            color: #FFFFFF !important;
+            opacity: 0.9;
+        }
     </style>
 </head>
 <body>
@@ -991,21 +1006,21 @@
             </div>
             <div class="main-card">
                 <div class="stats-section">
-                    <div class="stat-card">
-                        <div class="stat-number" id="totalVinsRemove">0</div>
-                        <div class="stat-label">Total VINs Enregistrés</div>
+                    <div class="stat-card stat-card-delete">
+                        <div class="stat-number" id="totalDeletedVins">0</div>
+                        <div class="stat-label">Total VINs Supprimés</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="todayVinsRemove">0</div>
-                        <div class="stat-label">Enregistrements Aujourd'hui</div>
+                    <div class="stat-card stat-card-delete">
+                        <div class="stat-number" id="todayDeletedVins">0</div>
+                        <div class="stat-label">Suppressions Aujourd'hui</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="weekVinsRemove">0</div>
-                        <div class="stat-label">Enregistrements Cette Semaine</div>
+                    <div class="stat-card stat-card-delete">
+                        <div class="stat-number" id="weekDeletedVins">0</div>
+                        <div class="stat-label">Suppressions Cette Semaine</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="monthVinsRemove">0</div>
-                        <div class="stat-label">Enregistrements Ce Mois</div>
+                    <div class="stat-card stat-card-delete">
+                        <div class="stat-number" id="monthDeletedVins">0</div>
+                        <div class="stat-label">Suppressions Ce Mois</div>
                     </div>
                 </div>
             </div>
@@ -1287,11 +1302,11 @@
                 this.weekVinsElement = document.getElementById('weekVins');
                 this.monthVinsElement = document.getElementById('monthVins');
 
-                // Stats elements for Remove tab
-                this.totalVinsElementRemove = document.getElementById('totalVinsRemove');
-                this.todayVinsElementRemove = document.getElementById('todayVinsRemove');
-                this.weekVinsElementRemove = document.getElementById('weekVinsRemove');
-                this.monthVinsElementRemove = document.getElementById('monthVinsRemove');
+                // Stats elements for Remove tab (suppressions)
+                this.totalDeletedVinsElement = document.getElementById('totalDeletedVins');
+                this.todayDeletedVinsElement = document.getElementById('todayDeletedVins');
+                this.weekDeletedVinsElement = document.getElementById('weekDeletedVins');
+                this.monthDeletedVinsElement = document.getElementById('monthDeletedVins');
                 
                 // Dashboard elements
                 this.dashboardElements = {
@@ -1410,11 +1425,11 @@
                 // Update data if viewing
                 if (tabId === 'view-vins') {
                     this.refreshData();
-                } else if (tabId === 'dashboard') {
-                    this.updateDashboard();
-                } else if (tabId === 'add-vin' || tabId === 'remove-vin') {
-                    // Actualiser les stats pour les onglets avec statistiques
+                } else if (tabId === 'add-vin') {
                     this.updateStats();
+                } else if (tabId === 'remove-vin' || tabId === 'remove-vin') {
+                    // Actualiser les stats pour les onglets avec statistiques
+                    this.updateDeletionStats();
                 }
             }
 
@@ -2252,6 +2267,9 @@
                         const response = await api.deleteVIN(this.currentVIN.id);
                         
                         if (response.success) {
+
+                            this.updateDeletionStats();
+                            
                             // Recharger les données depuis la base
                             await this.loadVINsFromDatabase();
                             
@@ -2626,6 +2644,27 @@
                 }
             }
 
+            async updateDeletionStats() {
+                try {
+                    const api = new VINTrackerAPI();
+                    const response = await api.getDeletionStats();
+        
+                    if (response.success) {
+                        this.totalDeletedVinsElement.textContent = response.deletionStats.total || 0;
+                        this.todayDeletedVinsElement.textContent = response.deletionStats.today || 0;
+                        this.weekDeletedVinsElement.textContent = response.deletionStats.thisWeek || 0;
+                        this.monthDeletedVinsElement.textContent = response.deletionStats.thisMonth || 0;
+                    }
+                } catch (error) {
+                    console.error('Erreur lors de la mise à jour des statistiques de suppression :', error);
+                    // Fallback avec des valeurs par défaut
+                    this.totalDeletedVinsElement.textContent = '0';
+                    this.todayDeletedVinsElement.textContent = '0';
+                    this.weekDeletedVinsElement.textContent = '0';
+                    this.monthDeletedVinsElement.textContent = '0';
+                }
+            }
+
             // ========== MESSAGES ==========
 
             showError(message) {
@@ -2771,6 +2810,16 @@
                     return await response.json();
                 } catch (error) {
                     console.error('Erreur lors du traitement OCR :', error);
+                    return { success: false, error: error.message };
+                }
+            }
+
+            async getDeletionStats() {
+                try {
+                    const response = await fetch(`${this.baseURL}/vins/deletion-stats`);
+                    return await response.json();
+                } catch (error) {
+                    console.error('Erreur lors de la récupération des stats de suppression :', error);
                     return { success: false, error: error.message };
                 }
             }
