@@ -2457,6 +2457,8 @@
                 // Vider et masquer l'image
                 this.capturedImage.style.display = 'none';
                 this.capturedImage.src = '';
+
+                document.querySelector('#add-vin .camera-container').style.display = 'none';
                 
                 // Vider le champ de texte
                 this.vinInput.value = '';
@@ -2484,6 +2486,8 @@
                 // Vider et masquer l'image
                 this.capturedImageRemove.style.display = 'none';
                 this.capturedImageRemove.src = '';
+
+                document.querySelector('#remove-vin .camera-container').style.display = 'none';
                 
                 // Vider le champ de texte
                 this.vinInputRemove.value = '';
