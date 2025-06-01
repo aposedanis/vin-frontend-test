@@ -1224,8 +1224,6 @@
                 this.canvas = document.getElementById('canvas');
                 this.capturedImage = document.getElementById('capturedImage');
 
-                // Bouton reset pour les stats de suppression
-                this.resetDeletionStatsBtn = document.getElementById('resetDeletionStatsBtn');
                 // Buttons
                 this.startCameraBtn = document.getElementById('startCamera');
                 this.capturePhotoBtn = document.getElementById('capturePhoto');
@@ -2224,8 +2222,6 @@
                         const response = await api.deleteVIN(this.currentVIN.id);
                         
                         if (response.success) {
-
-                            this.updateDeletionStats();
                             
                             // Recharger les données depuis la base
                             await this.loadVINsFromDatabase();
@@ -2598,27 +2594,6 @@
                     this.todayVinsElement.textContent = todayCount;
                     this.weekVinsElement.textContent = weekCount;
                     this.monthVinsElement.textContent = monthCount;
-                }
-            }
-
-            async updateDeletionStats() {
-                try {
-                    const api = new VINTrackerAPI();
-                    const response = await api.getDeletionStats();
-        
-                    if (response.success) {
-                        this.totalDeletedVinsElement.textContent = response.deletionStats.total || 0;
-                        this.todayDeletedVinsElement.textContent = response.deletionStats.today || 0;
-                        this.weekDeletedVinsElement.textContent = response.deletionStats.thisWeek || 0;
-                        this.monthDeletedVinsElement.textContent = response.deletionStats.thisMonth || 0;
-                    }
-                } catch (error) {
-                    console.error('Erreur lors de la mise à jour des statistiques de suppression :', error);
-                    // Fallback avec des valeurs par défaut
-                    this.totalDeletedVinsElement.textContent = '0';
-                    this.todayDeletedVinsElement.textContent = '0';
-                    this.weekDeletedVinsElement.textContent = '0';
-                    this.monthDeletedVinsElement.textContent = '0';
                 }
             }
 
