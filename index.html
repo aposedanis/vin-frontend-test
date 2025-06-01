@@ -112,6 +112,11 @@
             border-radius: 15px;
             overflow: hidden;
             box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .camera-container.active {
+            display: block;
         }
 
         #video {
@@ -1889,6 +1894,8 @@
                 const imageData = this.canvas.toDataURL('image/jpeg');
                 this.capturedImage.src = imageData;
                 this.capturedImage.style.display = 'block';
+
+                this.capturedImage.parentElement.classList.add('active');
                 
                 this.stopCamera();
                 this.processImage(imageData);
@@ -1911,6 +1918,7 @@
                     reader.onload = (e) => {
                         this.capturedImage.src = e.target.result;
                         this.capturedImage.style.display = 'block';
+                        this.capturedImage.parentElement.classList.add('active');
                         this.processImage(e.target.result);
                     };
                     reader.readAsDataURL(file);
@@ -2024,6 +2032,8 @@
                 const imageData = this.canvasRemove.toDataURL('image/jpeg');
                 this.capturedImageRemove.src = imageData;
                 this.capturedImageRemove.style.display = 'block';
+
+                this.capturedImageRemove.parentElement.classList.add('active');
                 
                 this.stopCameraRemove();
                 this.processImageRemove(imageData);
@@ -2046,6 +2056,7 @@
                     reader.onload = (e) => {
                         this.capturedImageRemove.src = e.target.result;
                         this.capturedImageRemove.style.display = 'block';
+                        this.capturedImageRemove.parentElement.classList.add('active');
                         this.processImageRemove(e.target.result);
                     };
                     reader.readAsDataURL(file);
@@ -2456,6 +2467,7 @@
             resetForm() {
                 // Vider et masquer l'image
                 this.capturedImage.style.display = 'none';
+                this.capturedImage.parentElement.classList.remove('active');
                 this.capturedImage.src = '';
 
                 document.querySelector('#add-vin .camera-container').style.display = 'none';
@@ -2485,6 +2497,7 @@
             resetFormRemove() {
                 // Vider et masquer l'image
                 this.capturedImageRemove.style.display = 'none';
+                this.capturedImageRemove.parentElement.classList.remove('active');
                 this.capturedImageRemove.src = '';
 
                 document.querySelector('#remove-vin .camera-container').style.display = 'none';
