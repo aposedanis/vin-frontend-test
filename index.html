@@ -843,7 +843,8 @@
             <div class="main-card">
                 <div class="upload-section">
                     <h2>Capturer Code VIN</h2>
-                    <p style="margin: 10px 0; color: #666;">Prenez une photo du code VIN ou sélectionnez une image</p>
+                    <p style="margin: 10px 0; color: #666;">Prenez une photo du code VIN ou sélectionnez une image pour extraire le VIN</p>
+                    <p style="margin: 10px 0; color: #999; font-size: 0.9em;">⚠️ Les images ne sont pas stockées, elles sont uniquement utilisées pour extraire le code VIN</p>
                     
                     <div class="camera-container">
                         <video id="video" autoplay></video>
@@ -1849,6 +1850,7 @@
 
                     // Debug : Afficher la réponse complète
                     console.log('Réponse OCR complète :', response);
+                    console.log('Image traitée pour extraction VIN uniquement - pas de stockage');
 
                     let extractedVIN = null;
                     if (response.success && response.vin) {
@@ -2098,7 +2100,6 @@
                     const vinData = {
                         code: vin,
                         date: new Date().toISOString(),
-                        image: this.capturedImage.src,
                         userAgent: navigator.userAgent
                     };
                     
@@ -2347,43 +2348,10 @@
                             <div class="vin-date" style="color: #7ED3F7; font-weight: 600;">⏰ ${this.getTimeAgo(vin.date)}</div>
                         </div>
                         <div class="vin-actions">
-                            ${vin.image ? `<button class="btn btn-secondary" onclick="tracker.viewImage('${vin.id}')">📷 Voir Image</button>` : ''}
                             <button class="btn btn-danger" onclick="tracker.deleteVINById(${vin.id})">🗑️ Supprimer</button>
                         </div>
                     </div>
                 `).join('');
-            }
-
-            viewImage(vinId) {
-                const vin = this.vins.find(v => v.id === parseInt(vinId));
-                if (vin && vin.image) {
-                    const imageWindow = window.open('', '_blank');
-                    imageWindow.document.write(`
-                        <html>
-                            <head>
-                                <title>VIN: ${vin.code}</title>
-                                <style>
-                                    body { 
-                                        margin: 0; 
-                                        display: flex; 
-                                        justify-content: center; 
-                                        align-items: center; 
-                                        min-height: 100vh; 
-                                        background: #f0f0f0;
-                                    }
-                                    img { 
-                                        max-width: 90%; 
-                                        max-height: 90vh; 
-                                        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-                                    }
-                                </style>
-                            </head>
-                            <body>
-                                <img src="${vin.image}" alt="VIN: ${vin.code}">
-                            </body>
-                        </html>
-                    `);
-                }
             }
 
             // ========== FONCTIONS DE RÉINITIALISATION ==========
